@@ -282,3 +282,30 @@ body {
     visibility: visible;
     opacity: 1;
 }
+
+/* スマホ用メディアクエリ */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .image_container {
+        padding: 10px;
+    }
+
+    .qa_container {
+        padding: 10px;
+    }
+
+    .speech-bubble {
+        padding: 10px;
+    }
+
+    #questionContainer {
+        padding: 10px;
+    }
+
+    #nextButtonContainer {
+        margin-top: 10px;
+    }
+}
