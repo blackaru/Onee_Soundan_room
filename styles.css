@@ -1,0 +1,284 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #bea1a4;
+}
+
+.container {
+    display: flex;
+    /* 子要素を縦方向中央揃え */
+    flex-direction: column;
+}
+
+.header {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgb(63, 59, 59);
+}
+
+
+#results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    margin-left: 50px;
+    margin-bottom: 20px;
+    margin-top: -50px;
+}
+
+.image_container {
+    display: flex;
+    position: relative;
+    /* Flexbox を使用して子要素を横並びにする */
+    flex-direction: row;
+    /* 子要素を縦方向中央揃え */
+    margin-top: 20px;
+}
+
+.image_container .image img {
+    width: 180px;
+    /* 画像の幅を適宜調整 */
+    position: relative;
+    height: auto;
+    /* 画像と吹き出しの間にスペースを追加 */
+    margin-right: 10px;
+}
+
+.image_container #question_list {
+    /* flex: 1; */
+    /* 残りのスペースを均等に分配 */
+    margin-left: 30px;
+    min-width: 130px;
+    color: rgb(63, 59, 59);
+}
+
+.image_container #selections {
+    max-width: 200px;
+    width: auto;
+    /* 選択肢の幅を適宜調整 */
+    /* margin: 30px 20px 10px 0px; */
+    /* 上、右、下、左のマージン */
+    margin-right: 0px;
+    font-weight: bold;
+    /* 文字をボールド（太字）にする */
+    white-space: nowrap;
+    /* テキストを折り返さない */
+    overflow: hidden;
+    /* 溢れた部分を隠す */
+    text-overflow: ellipsis;
+    /* 溢れた部分を省略記号にする */
+    color: rgb(56, 54, 54);
+}
+
+.qa_container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.speech-bubble {
+    position: relative;
+    background: #e8bec6;
+    color: rgb(56, 54, 54);
+    border-radius: 10px;
+    padding: 5px;
+    /* max-width: 800px; */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-left: 50px;
+    align-self: flex-start;
+    /* speech-bubble のみ左寄せ */
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    top: -19px;
+    left: 20%;
+    /* margin-left: -50px; */
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent #e8bec6 transparent;
+    transform: translateX(-80%);
+}
+
+#options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px;
+    max-width: 600px;
+    width: auto;
+    padding-top: 20px;
+}
+
+#options button {
+    margin: 5px;
+    padding: 10px 10px;
+    border: none;
+    background-color: transparent;
+    border: 2px solid #ad82ae;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.option-button.selected {
+    border: 2px solid transparent !important;
+    background-color: #9ca813 !important;
+    color: white !important;
+}
+
+#questionContainer {
+    /* margin-top: 20px; */
+    width: 100%;
+}
+
+#question {
+    font-size: 1.2em;
+}
+
+
+/* スライダーコンテナのスタイル */
+#slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    /* 画面の高さを占有 */
+    text-align: center;
+    padding: 10px;
+}
+
+/* スライダーのスタイル */
+#income-slider {
+    /* Webkitベースブラウザ (Chrome, Safari) */
+    -webkit-appearance: none;
+    /* Firefox用 */
+    -moz-appearance: none;
+    /* 他のブラウザ用のデフォルトスタイル */
+    appearance: none;
+    width: 80%;
+    /* スライダーの長さを調整 */
+    height: 10px;
+    background: #9ca813;
+    outline-width: 5px;
+    border: 2px solid #ad82ae;
+    opacity: 0.7;
+    transition: opacity .9s;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+#income-slider:hover {
+    opacity: 2.0;
+}
+
+/* スライダーのサム（つまみ）のスタイル */
+#income-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #ad82ae;
+    border: 2px solid #ad82ae;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#income-slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #b846b8;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#income-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    /* スライダーの長さに合わせる */
+}
+
+#nextButtonContainer {
+    padding-top: 20px;
+}
+
+#nextButton {
+    padding: 10px;
+    width: 100px;
+    border: none;
+    background-color: #ad82ae;
+    color: rgb(63, 59, 59);
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#nextButton:hover {
+    background-color: #9ca813;
+}
+
+#resultButton {
+    border: none;
+    background-color: #83148d;
+    color: rgb(63, 59, 59);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #9ca813;
+    color: rgb(63, 59, 59);
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 9999;
+    bottom: 105%;
+    /* Position the tooltip above the text */
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: small;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}

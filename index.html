@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おネエ相談室</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.0.1/math.min.js"></script>
+</head>
+
+<body>
+    <div class="header">おネエ相談室</div>
+    <div class="container">
+        <div class="image_container">
+            <div class="image">
+                <img src="color_onee.png" alt="画像">
+            </div>
+            <div id="question_list"></div>
+            <div id="selections"></div>
+        </div>
+
+        <div class="qa_container">
+            <div class="speech-bubble">
+                <div id="question"></div>
+            </div>
+            <div id="questionContainer">
+                <div id="options"></div>
+                <div id="slider-container">
+                    <input type="range" id="income-slider" min="0" max="1000" step="10" value="300">
+                    <div id="income-value">300万円以上</div>
+                </div>
+            </div>
+            <div id="nextButtonContainer">
+                <button id="nextButton" onclick="showNextQuestion()">次へ</button>
+            </div>
+        </div>
+
+        <div id="resultsContainer" style="display:none;">
+            <!-- <h2>結果</h2> -->
+            <div id="results"></div>
+        </div>
+    </div>
+    </div>
+    <script src="result.js" defer></script>
+    <script src="script.js" defer></script>
+</body>
+
+</html>
