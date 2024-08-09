@@ -10,20 +10,18 @@
 </head>
 
 <body>
-    <div class="header">おネエ相談室</div>
+    <div class="header">おネェ相談室</div>
     <div class="container">
         <div class="image_container">
             <div class="image">
                 <img src="color_onee.png" alt="画像">
             </div>
-            <div id="question_list"></div>
-            <div id="selections"></div>
-        </div>
-
-        <div class="qa_container">
             <div class="speech-bubble">
                 <div id="question"></div>
             </div>
+        </div>
+
+        <div class="qa_container">
             <div id="questionContainer">
                 <div id="options"></div>
                 <div id="slider-container">
@@ -37,10 +35,12 @@
         </div>
 
         <div id="resultsContainer" style="display:none;">
-            <!-- <h2>結果</h2> -->
-            <div id="results"></div>
+            <div class="results-header">回答記録</div>
+            <div class="results-content">
+                <div id="question_list"></div>
+                <div id="selections"></div>
+            </div>
         </div>
-    </div>
     </div>
     <script src="result.js" defer></script>
     <script src="script.js" defer></script>

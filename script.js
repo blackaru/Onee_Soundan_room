@@ -24,9 +24,7 @@ function showResults() {
     const resultsContainer = document.getElementById('results');
     const question = document.getElementById('question');
 
-
     // ボタンを押した時点でresult.jsの計算処理を実行し、結果を取得する
-    // performCalculation(function (population, sum_age_area_population, population_Rate) {
     performCalculation(function (population, sum_age_area_population, population_Rate) {
 
         question.innerHTML = `
@@ -35,27 +33,10 @@ function showResults() {
             <b>${sum_age_area_population}</b>人もいるのに、<br>
             あなたの理想に合う人は<b>${population_Rate}</b>％しかいないわよ。<br>
         `;
-        resultsContainer.innerHTML = ``;
-        const div = document.createElement('div');
-        div.innerHTML = `※母数対象：未婚者。５人以上を雇用する事業所に勤める人。`;
-
-        // resultsContainer.innerHTML = ``;
-        // const div = document.createElement('div');
-        // div.innerHTML = `
-        //     あなたの選択した条件に合う人は <b>${population}</b> 人いるようね。<br>
-        //     あなたが選択した「<b>${selectedAnswers[2]}</b>」に住む「<b>${selectedAnswers[1]}</b>」の<b>${selectedAnswers[0]}</b>の人数は、<br>
-        //     <b>${sum_age_area_population}</b>人もいるのに、<br>
-        //     あなたはそのうちの<b>${population_Rate}</b>％しか理想じゃないようね。<br>
-        //     <br>
-        //     ※対象<br>
-        //     　　未婚者<br>
-        //     　　５人以上を雇用する事業所に勤める人<br>
-        // `;
-
-        resultsContainer.appendChild(div);
 
         document.getElementById('resultsContainer').style.display = 'block';
         document.getElementById('resultButton').style.display = 'none';
+        document.getElementById('questionContainer').style.display = 'none';
 
 
         //「結果を確認」ボタン押下後にボタンを削除
@@ -102,6 +83,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // showQuestion関数の最後にスライダーの表示を更新するように追加
     //質問および選択肢の画面表示
     function showQuestion() {
+        const nextButton = document.getElementById('nextButton');
+
+        // nextButtonがホバー状態なら、通常状態にリセットする
+        nextButton.style.backgroundColor = ''; // 背景色をリセット（CSSで定義された状態に戻る）
+
+        // マウスがボタン上にいる場合、hover状態を強制的に解除
+        nextButton.dispatchEvent(new Event('mouseleave'));
+
         showQuestionList();
 
         if (currentQuestionIndex < questions.length) {
