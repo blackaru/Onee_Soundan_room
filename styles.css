@@ -277,10 +277,22 @@ body {
     margin-right: 0px;
     font-weight: bold;
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: scroll;
+    overflow-y: hidden;
     text-overflow: ellipsis;
     color: rgb(56, 54, 54);
     font-size: small;
+}
+
+#retryButton {
+    padding: 10px 20px;
+    border: none;
+    background-color: #83148d;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
 }
 
 /* Tooltip container */

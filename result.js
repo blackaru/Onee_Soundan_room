@@ -31,7 +31,7 @@ let part_height_Rate = [];
 let height_Rate = [];
 let part_body_Rate = [];
 let body_Rate = [];
-let personality_Rate = [];;
+let personality_Rate = [];
 
 let answers = [];
 
@@ -185,36 +185,53 @@ function calculatePopulation() {
     }
 
     //質問4（年収）：該当の年収取得者の割合を求める
-    jobless_Rate = calculateByOneElement(jobless, answers.region.length, 4, answers.region);
+
     let stdDevIncome = [];
     let aveIncome = [];
     let workerProportion = [];
     let proportionAboveTarget = [];
-    const text1 = [];
-    const text2 = [];
-    text1[0] = '平均年収';
-    text2[0] = '労働者割合';
+    let edit_answers_edu = [];
+    const incm_text1 = [];
+    const incm_text2 = [];
+    incm_text1[0] = '平均年収';
+    incm_text2[0] = '労働者割合';
 
-    if (answers.income === '収入無しでもOK') {
+    if (answers.income[0] === '0') {
+        for (let e2 = 0; e2 < answers.region.length; e2++) {
+            jobless_Rate[e2] = 0;
+        }
+
         for (let e1 = 0; e1 < answers.age.length; e1++) {
             income_Rate[e1] = 1.0;
         }
     } else {
+        jobless_Rate = calculateByOneElement(jobless, answers.region.length, 3, answers.region);
+
         //在学中の学生には収入がないものと見ているので、年収の回答が"収入無しでもOK"ではない場合は配列から”在学中”の要素を削除する(在学中で収入有の人はいないため)
         answers.edu = answers.edu.filter(item => item !== "在学中");
+        //学歴の回答が”気にしない”の場合、Incm_Males.csvの形式に合わせるために、”気にしない”の要素を配列から削除する
+        edit_answers_edu = answers.edu.filter(item => item !== "気にしない");
+
         // 正規分布の累積分布関数 (CDF) を使用して推定
         function normalCDF(x, ave, stdDev) {
             return (1 + math.erf((x - ave) / (Math.sqrt(2) * stdDev))) / 2;
         }
-        aveIncome = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, answers.edu.length, 6, answers.edu, 1, 4, text1);
-        workerProportion = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, answers.edu.length, 6, answers.edu, 1, 4, text2);
+        if (answers.gender[0] === '男性') {
+            aveIncome = calculateByThreeElements_e2s(Incm_Males, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text1);
+            workerProportion = calculateByThreeElements_e2s(Incm_Males, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text2);
+            // aveIncome = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, 99, 4, text1, answers.edu.length, 6, answers.edu);
+            // workerProportion = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, 99, 4, text2, answers.edu.length, 6, answers.edu);
+        } else {
+            aveIncome = calculateByThreeElements_e2s(Incm_Fems, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text1);
+            workerProportion = calculateByThreeElements_e2s(Incm_Fems, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text2);
+        }
         // 二次元配列を初期化
-        for (let i = 0; i < answers.edu.length; i++) {
+        for (let i = 0; i < edit_answers_edu.length; i++) {
             stdDevIncome[i] = new Array(answers.age.length).fill(0);
             proportionAboveTarget[i] = new Array(answers.age.length).fill(0);
         }
         for (let e1 = 0; e1 < answers.age.length; e1++) {
-            for (let e2 = 0; e2 < answers.edu.length; e2++) {
+            for (let e2 = 0; e2 < edit_answers_edu.length; e2++) {
                 stdDevIncome[e2][e1] = aveIncome[e2][e1] * 0.25; // 平均年収の25%を標準偏差として仮定
                 proportionAboveTarget[e2][e1] = 1 - normalCDF(answers.income[0], aveIncome[e2][e1], stdDevIncome[e2][e1]);  //回答した年収以上の人の割合を求める
                 if (!income_Rate[e1]) {
@@ -229,22 +246,43 @@ function calculatePopulation() {
     //質問5（兄弟構成）：該当の兄弟構成の人の割合を求める
     let sum_brotherRate = 0;
     if (answers.brother[0] === '気にしない') {
-        brother_Rate = 1;
+        sum_brotherRate = 1;
     } else {
         brother_Rate = calculateByOneElement(brothers, answers.brother.length, 5, answers.brother)
-    }
-    for (let e1 = 0; e1 < answers.brother.length; e1++) {
-        sum_brotherRate += parseFloat(brother_Rate[e1]);
+        for (let e1 = 0; e1 < answers.brother.length; e1++) {
+            sum_brotherRate += parseFloat(brother_Rate[e1]);
+        }
     }
 
     // 質問6（学歴）：該当の学歴の人の割合を求める
-    if (answers.gender[0] === '男性') {
-        //年齢が２つ、地域が２つ指定された時に４つのedu_rateが取得できるか要確認
-        edu_Rate = calculateByThreeElements(edu_Males, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
-    } else {
-        edu_Rate = calculateByThreeElements(edu_Fems, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
+    const edu_text = [];
+    edu_text[0] = '在学中';
+    // 二次元配列を初期化
+    for (let i = 0; i < answers.region.length; i++) {
+        edu_Rate[i] = new Array(answers.age.length).fill(0);
     }
 
+    if (answers.edu[0] === '気にしない') {
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            for (let e2 = 0; e2 < answers.region.length; e2++) {
+                edu_Rate[e2][e1] = 1;
+            }
+        }
+    } else {
+        //在学中の人口を差し引く計算を追加する
+        if (answers.gender[0] === '男性') {
+            edu_Rate = calculateByThreeElements_e3s(edu_Males, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
+            stu_rate = calculateByThreeElements_e2s(edu_Males, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, 1, 6, edu_text);
+        } else {
+            edu_Rate = calculateByThreeElements_e3s(edu_Fems, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
+            stu_rate = calculateByThreeElements_e2s(edu_Fems, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, 1, 6, edu_text);
+        }
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            for (let e2 = 0; e2 < answers.region.length; e2++) {
+                edu_Rate[e2][e1] = edu_Rate[e2][e1] - stu_rate[e2][e1];
+            }
+        }
+    }
 
     // 質問7（交際状況）：該当の交際状況の人の割合を求める
     let ageForLover = [];
@@ -279,61 +317,61 @@ function calculatePopulation() {
     //実家暮らしかどうかのデータ取得不可のため、なし
 
     // 質問8（身長）：該当の身長の人の割合を求める
-    if (answers.gender[0] === '男性') {
-        //年齢が２つ指定された時に2つのheight_Rateを取得する
-        part_height_Rate = calculateByTwoElements(height_Males, answers.age.length, 2, answers.age, answers.height.length, 8, answers.height);
+    if (answers.height[0] === '気にしない') {
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            height_Rate[e1] = 1;
+        }
     } else {
-        part_height_Rate = calculateByTwoElements(height_Fems, answers.age.length, 2, answers.age, answers.height.length, 8, answers.height);
-    }
-    for (let e1 = 0; e1 < answers.age.length; e1++) {
-        for (let e2 = 0; e2 < answers.height.length; e2++) {
-            if (!height_Rate[e1]) {
-                height_Rate[e1] = 0; // 初期化
+        if (answers.gender[0] === '男性') {
+            //年齢が２つ指定された時に2つのheight_Rateを取得する
+            part_height_Rate = calculateByTwoElements(height_Males, answers.age.length, 2, answers.age, answers.height.length, 8, answers.height);
+        } else {
+            part_height_Rate = calculateByTwoElements(height_Fems, answers.age.length, 2, answers.age, answers.height.length, 8, answers.height);
+        }
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            for (let e2 = 0; e2 < answers.height.length; e2++) {
+                if (!height_Rate[e1]) {
+                    height_Rate[e1] = 0; // 初期化
+                }
+                height_Rate[e1] += part_height_Rate[e2][e1];
             }
-            height_Rate[e1] += part_height_Rate[e2][e1];
         }
     }
 
-
     // 質問9（体型）：該当の体型の人の割合を求める
-    if (answers.gender[0] === '男性') {
-        //年齢が２つ指定された時に2つのheight_Rateを取得する
-        part_body_Rate = calculateByTwoElements(body_Males, answers.age.length, 2, answers.age, answers.body.length, 9, answers.body);
+    if (answers.body[0] === '気にしない') {
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            body_Rate[e1] = 1;
+        }
     } else {
-        part_body_Rate = calculateByTwoElements(body_Fems, answers.age.length, 2, answers.age, answers.body.length, 9, answers.body);
-    }
-    //選択された年齢の数だけ配列に格納していく
-    for (let e1 = 0; e1 < answers.age.length; e1++) {
-        for (let e2 = 0; e2 < answers.gender.length; e2++) {
-            if (!body_Rate[e1]) {
-                body_Rate[e1] = 0; // 初期化
+        if (answers.gender[0] === '男性') {
+            //年齢が２つ指定された時に2つのheight_Rateを取得する
+            part_body_Rate = calculateByTwoElements(body_Males, answers.age.length, 2, answers.age, answers.body.length, 9, answers.body);
+        } else {
+            part_body_Rate = calculateByTwoElements(body_Fems, answers.age.length, 2, answers.age, answers.body.length, 9, answers.body);
+        }
+        //選択された年齢の数だけ配列に格納していく
+        for (let e1 = 0; e1 < answers.age.length; e1++) {
+            for (let e2 = 0; e2 < answers.gender.length; e2++) {
+                if (!body_Rate[e1]) {
+                    body_Rate[e1] = 0; // 初期化
+                }
+                body_Rate[e1] += part_body_Rate[e2][e1];
             }
-            body_Rate[e1] += part_body_Rate[e2][e1];
         }
     }
 
     // 質問10（性格）：該当の性格の人の割合を求める
     let sum_personalityRate = 0;
+
     if (answers.personality[0] === '気にしない') {
-        personality_Rate = 1;
+        sum_personalityRate = 1;
     } else {
         personality_Rate = calculateByOneElement(personalities, answers.personality.length, 10, answers.personality)
+        for (let e1 = 0; e1 < answers.personality.length; e1++) {
+            sum_personalityRate += parseFloat(personality_Rate[e1]);
+        }
     }
-    for (let e1 = 0; e1 < answers.personality.length; e1++) {
-        sum_personalityRate += parseFloat(personality_Rate[e1]);
-    }
-
-    console.log("age_area_population:", age_area_population);
-    console.log("jobless_Rate:", jobless_Rate);
-    console.log("income_Rate:", income_Rate);
-    console.log("brother_Rate:", brother_Rate);
-    console.log("sum_brotherRate:", sum_brotherRate);
-    console.log("edu_Rate:", edu_Rate);
-    console.log("lover_Rate:", lover_Rate);
-    console.log("height_Rate:", height_Rate);
-    console.log("body_Rate:", body_Rate);
-    console.log("personality_Rate:", personality_Rate);
-    console.log("sum_personalityRate:", sum_personalityRate);
 
     let population_array_1 = [];
     let population_array_2 = [];
@@ -346,11 +384,6 @@ function calculatePopulation() {
     for (let e1 = 0; e1 < answers.age.length; e1++) {
         for (let e2 = 0; e2 < answers.region.length; e2++) {
 
-            console.log("[e2][e1]=[%d][%d]", e2, e1);
-            console.log("age_area_population[e2][e1]=：", age_area_population[e2][e1]);
-            console.log("jobless_Rate[e2]=：", jobless_Rate[e2]);
-
-
             //地域に影響する要素（失業者）を差し引く
             population_array_1[e2][e1] = age_area_population[e2][e1] * (1 - jobless_Rate[e2]);
             //年齢に影響する要素に対する割合をかける
@@ -359,39 +392,64 @@ function calculatePopulation() {
             population += population_array_2[e2][e1] * edu_Rate[e2][e1];
             sum_age_area_population += age_area_population[e2][e1];
 
-            console.log("population_array_1[e2][e1]=：", population_array_1[e2][e1]);
-            console.log("population_array_2[e2][e1]=：", population_array_2[e2][e1]);
-            console.log("population+=：", population);
         }
     }
-
-    console.log("sum_age_area_population:", sum_age_area_population);
-    console.log("sum_personalityRate:", sum_personalityRate);
 
     population = population * sum_brotherRate * sum_personalityRate;
     population_Rate = population / sum_age_area_population * 100;
 
-    console.log("population * brother_Rate* personality_Rate:", population);
-
-
     population = Math.round(population);
     population_Rate = population / sum_age_area_population * 100;
-    console.log("population_Rate:", population_Rate);
 
+    population = population.toLocaleString();
     sum_age_area_population = sum_age_area_population.toLocaleString();
     population_Rate = roundTo(population_Rate, 2);
-
-    console.log("sum_age_area_population.toLocaleString():", sum_age_area_population);
-    console.log("roundTo(population_Rate):", population_Rate);
-
-    console.log("Math.round(population)(population):", population);
-    console.log("answers:", answers);
 
     return [population, sum_age_area_population, population_Rate];
 
 }
 
-function calculateByThreeElements(csvArray, e1SelectedNum, rowQuestionNum, firstRowKey, e2SelectedNum, columnQuestionNum1, ColumnKey1, e3SelectedNum, columnQuestionNum2, ColumnKey2) {
+//２列目の要素数を引数として渡す場合にこの関数を使用する
+function calculateByThreeElements_e2s(csvArray, e1SelectedNum, rowQuestionNum, firstRowKey, e2SelectedNum, columnQuestionNum1, ColumnKey1, e3SelectedNum, columnQuestionNum2, ColumnKey2) {
+    let array_three = [];
+    //２列目の要素数:columnQuestionNum2
+    const columnCount = (options[columnQuestionNum1 - 1].length - 2) * columnQuestionNum2;
+
+    // 二次元配列を初期化
+    for (let i = 0; i < e2SelectedNum; i++) {
+        array_three[i] = new Array(e1SelectedNum).fill(0);
+    }
+    for (let e1 = 0; e1 < e1SelectedNum; e1++) {
+        for (let i = 2; i < options[rowQuestionNum - 1].length; i++) { // 1行目はヘッダーなのでスキップ
+            if (firstRowKey[e1] === csvArray[0][i]) {
+                let column = i;
+                //列キーの選択肢文ループ
+                for (let e2 = 0; e2 < e2SelectedNum; e2++) {
+                    for (let e3 = 0; e3 < e3SelectedNum; e3++) {
+                        for (let j = 0; j < columnCount; j++) {
+                            // 列の各項目と列キーとを照らし合わせて行番を決定
+                            if (ColumnKey1[e2] === csvArray[j][0] && ColumnKey2[e3] === csvArray[j][1]) {
+                                let row = j;
+                                //ColumnKey1とfirstRowKeyの2次元配列として返す
+                                if (e2SelectedNum !== 1) {
+                                    //複数選択された場合、年齢ごとに足しこんでから返す
+                                    array_three[e2][e1] += parseFloat(csvArray[row][column]);
+                                } else {
+                                    array_three[e2][e1] = parseFloat(csvArray[row][column]);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return array_three;
+}
+
+function calculateByThreeElements_e3s(csvArray, e1SelectedNum, rowQuestionNum, firstRowKey, e2SelectedNum, columnQuestionNum1, ColumnKey1, e3SelectedNum, columnQuestionNum2, ColumnKey2) {
     let array_three = [];
     const columnCount = (options[columnQuestionNum1 - 1].length - 2) * (options[columnQuestionNum2 - 1].length - 2);
     // 二次元配列を初期化

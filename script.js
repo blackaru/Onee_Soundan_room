@@ -28,10 +28,10 @@ function showResults() {
     performCalculation(function (population, sum_age_area_population, population_Rate) {
 
         question.innerHTML = `
-            あなたの選択した条件に合う人は <b>${population}</b> 人いるようね。<br>
-            あなたが選択した「<b>${selectedAnswers[2]}</b>」に住む「<b>${selectedAnswers[1]}</b>」の<b>${selectedAnswers[0]}</b>の人数は、<br>
-            <b>${sum_age_area_population}</b>人もいるのに、<br>
-            あなたの理想に合う人は<b>${population_Rate}</b>％しかいないわよ。<br>
+            あなたの条件に合う人は <b>${population}</b> 人いることがわかったわよ。<br>
+            あなたの「年齢・地域」の条件に合う人は、<br>
+            <b>${sum_age_area_population}</b>人もいるけど、<br>
+            あなたの理想に合う人はそのうち<b>${population_Rate}</b>％のようね。<br>
         `;
 
         document.getElementById('resultsContainer').style.display = 'block';
@@ -52,98 +52,94 @@ document.addEventListener("DOMContentLoaded", function () {
     const incomeValue = document.getElementById('income-value');
     const sliderContainer = document.getElementById('slider-container'); // スライダーコンテナ
 
-    // スライダーの値が変更されたときの処理
-    incomeSlider.addEventListener('input', function () {
-        const value = incomeSlider.value;
-        // incomeValue.textContent = `${value}万円～`;
-        // sliderValue.textContent = value + '万円';
-        if (value === '0') {
-            incomeValue.textContent = "収入無しでもOK";
-        } else {
-            incomeValue.textContent = value + '万円以上';
-        }
-        selectedAnswers[currentQuestionIndex] = [value];
-    });
-
-    // 質問が変更されたときにスライダーを表示する関数
-    function showSliderForIncomeQuestion() {
-        if (currentQuestionIndex === 3) {
-            sliderContainer.style.display = 'flex';
-            const optionButtons = document.querySelectorAll('#options button');
-            optionButtons.forEach(btn => btn.style.display = 'none'); // 選択肢ボタンを非表示にする
-        } else {
-            sliderContainer.style.display = 'none';
-            const optionButtons = document.querySelectorAll('#options button');
-            optionButtons.forEach(btn => btn.style.display = 'block'); // 選択肢ボタンを表示する
-        }
-        // showSelections();
-
-    }
-
-    // showQuestion関数の最後にスライダーの表示を更新するように追加
     //質問および選択肢の画面表示
     function showQuestion() {
         const nextButton = document.getElementById('nextButton');
 
         // nextButtonがホバー状態なら、通常状態にリセットする
         nextButton.style.backgroundColor = ''; // 背景色をリセット（CSSで定義された状態に戻る）
-
         // マウスがボタン上にいる場合、hover状態を強制的に解除
         nextButton.dispatchEvent(new Event('mouseleave'));
 
         showQuestionList();
 
         if (currentQuestionIndex < questions.length) {
-            const question = questions[currentQuestionIndex];
-            if (question[1] === 'multiple') {
-                document.getElementById('question').innerText = question[3] + '\n(複数選択可)';
-            } else {
-                document.getElementById('question').innerText = question[3];
-            }
-            const optionsContainer = document.getElementById('options');
-            optionsContainer.innerHTML = '';
+            // 質問4：収入の場合のみスライダーを表示
+            if (currentQuestionIndex === 3) { // 質問4はインデックス3
 
-            setOptionsByGender(); // 性別に基づいて選択肢を設定
 
-            const optionsToDisplay = options[currentQuestionIndex];
-            const isMultipleChoice = optionsToDisplay[1] === '〇';
+                // スライダーの値が変更されたときの処理
+                incomeSlider.addEventListener('input', function () {
+                    const value = incomeSlider.value;
 
-            for (let i = 2; i < optionsToDisplay.length; i++) {
-                const option = optionsToDisplay[i];
-                const button = document.createElement('button');
-                button.innerText = option;
-                button.classList.add('option-button');
-                // console.log("button.classList:", button.classList); // クリックされたときのログ
-
-                // クリックイベントを設定
-                button.onclick = () => {
-                    toggleOption(button, option, isMultipleChoice);
-
-                    // デバッグ用ログ
-                    console.log("Creating button for option:", option);
-                    console.log("selectedAnswers:", selectedAnswers);
-
-                    // 選択状態を反映
-                    if (selectedAnswers[currentQuestionIndex] && selectedAnswers[currentQuestionIndex].includes(option)) {
-                        button.classList.add('selected');
+                    if (value === '0') {
+                        incomeValue.textContent = "収入無しでもOK";
                     } else {
-                        button.classList.remove('selected');
+                        incomeValue.textContent = value + '万円以上';
                     }
-                    // showSelections();
-                };
+                    selectedAnswers[currentQuestionIndex] = [value];
+                });
 
-                // 質問10の場合のみツールチップを追加
-                if (currentQuestionIndex === 9 && i !== 2) { // 質問10はインデックス9
-                    const tooltipSpan = document.createElement('span');
-                    tooltipSpan.classList.add('tooltiptext');
-                    tooltipSpan.innerText = tooltips[currentQuestionIndex][i - 1];
-                    const tooltipDiv = document.createElement('div');
-                    tooltipDiv.classList.add('tooltip');
-                    tooltipDiv.appendChild(button);
-                    tooltipDiv.appendChild(tooltipSpan);
-                    optionsContainer.appendChild(tooltipDiv);
+                sliderContainer.style.display = 'flex';
+                const optionButtons = document.querySelectorAll('#options button');
+                optionButtons.forEach(btn => btn.style.display = 'none'); // 選択肢ボタンを非表示にする
+                selectedAnswers[currentQuestionIndex] = incomeSlider.value;
+
+            } else {
+                sliderContainer.style.display = 'none';
+                const optionButtons = document.querySelectorAll('#options button');
+                optionButtons.forEach(btn => btn.style.display = 'block'); // 選択肢ボタンを表示する
+
+                const question = questions[currentQuestionIndex];
+                if (question[1] === 'multiple') {
+                    document.getElementById('question').innerText = question[3] + '\n(複数選択可)';
                 } else {
-                    optionsContainer.appendChild(button);
+                    document.getElementById('question').innerText = question[3];
+                }
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = '';
+
+                setOptionsByGender(); // 性別に基づいて選択肢を設定
+
+                const optionsToDisplay = options[currentQuestionIndex];
+                const isMultipleChoice = optionsToDisplay[1] === '〇';
+
+                for (let i = 2; i < optionsToDisplay.length; i++) {
+                    const option = optionsToDisplay[i];
+                    const button = document.createElement('button');
+
+                    // 質問10：性格の場合のみツールチップを追加
+                    if (currentQuestionIndex === 9 && i !== 2) { // 質問10はインデックス9
+                        const tooltipSpan = document.createElement('span');
+                        tooltipSpan.classList.add('tooltiptext');
+                        tooltipSpan.innerText = tooltips[currentQuestionIndex][i - 1];
+                        const tooltipDiv = document.createElement('div');
+                        tooltipDiv.classList.add('tooltip');
+                        tooltipDiv.appendChild(button);
+                        tooltipDiv.appendChild(tooltipSpan);
+                        optionsContainer.appendChild(tooltipDiv);
+                    } else {
+                        optionsContainer.appendChild(button);
+                    }
+
+                    // 質問4以外の場合
+                    if (currentQuestionIndex !== 3) { // 質問4はインデックス3
+                        button.innerText = option;
+                        button.classList.add('option-button');
+
+                        // クリックイベントを設定
+                        button.onclick = () => {
+                            toggleOption(button, option, isMultipleChoice);
+
+                            // 選択状態を反映
+                            if (selectedAnswers[currentQuestionIndex] && selectedAnswers[currentQuestionIndex].includes(option)) {
+                                button.classList.add('selected');
+                            } else {
+                                button.classList.remove('selected');
+                            }
+                            allSelectedButton(button, option);
+                        };
+                    }
                 }
             }
         } else {
@@ -159,55 +155,67 @@ document.addEventListener("DOMContentLoaded", function () {
             resultButton.onclick = showResults;
             document.getElementById('options').appendChild(resultButton);
         }
-        showSliderForIncomeQuestion();
     }
 
+    function allSelectedButton(button, option) {
+        // 質問4～11の場合の特定処理
+        if (currentQuestionIndex >= 3 && currentQuestionIndex <= 9) {
+            const optionButtons = document.querySelectorAll('#options button');
+            const isFirstOptionSelected = optionButtons[0].classList.contains('selected');
+
+            if (option === options[currentQuestionIndex][2]) {//"気にしない"のボタンが押下された時の処理
+                if (isFirstOptionSelected) {
+                    optionButtons.forEach(button => button.classList.add('selected'));// 選択状態にする
+                    // 現在の質問に対するユーザーの選択を記録
+                    selectedAnswers[currentQuestionIndex] = options[currentQuestionIndex].slice(2);
+
+                } else {
+                    optionButtons.forEach(button => button.classList.remove('selected'));// 選択状態にする
+
+                    // 現在の質問に対するユーザーの選択をリセット
+                    selectedAnswers[currentQuestionIndex] = [];
+                }
+            } else {　//"気にしない"以外のボタンが押下された時の処理
+
+                optionButtons.forEach((btn, index) => {
+                    if (!btn.classList.contains('selected')) {// 解除状態のボタンがあるなら
+                        optionButtons[0].classList.remove('selected'); // 最初の選択肢も解除
+                        selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(item => item !== optionButtons[0].textContent);
+                    }
+                });
+                // 他のすべての選択肢が選択されている場合、最初の選択肢も選択状態にする
+                if (Array.from(optionButtons).slice(1).every(btn => btn.classList.contains('selected'))) {
+                    optionButtons[0].classList.add('selected');
+                    // 現在の質問に対するユーザーの選択を記録
+                    selectedAnswers[currentQuestionIndex] = options[currentQuestionIndex].slice(2);
+                }
+            }
+        }
+    }
 
     // ボタンの選択状態を切り替える関数
     function toggleOption(button, option, isMultipleChoice) {
-        // 質問4～11の場合の特定処理
-        if (currentQuestionIndex >= 3 && currentQuestionIndex <= 9 && option === options[currentQuestionIndex][2]) {
-            const optionButtons = document.querySelectorAll('#options button');
-            const isFirstOptionSelected = button.classList.contains('selected');
-
-            if (isFirstOptionSelected) {
-                // 最初の選択肢が選択されている場合、すべての選択肢を解除
-                optionButtons.forEach(btn => btn.classList.remove('selected'));
-                selectedAnswers[currentQuestionIndex] = [];
-            } else {
-                // 最初の選択肢が選択されていない場合、すべての選択肢を選択
-                optionButtons.forEach(btn => btn.classList.add('selected'));
-                selectedAnswers[currentQuestionIndex] = options[currentQuestionIndex].slice(2);
-            }
-
-            // showSelections();
-            return;     // 関数の実行を終了する
-        }
 
         if (isMultipleChoice) {
             button.classList.toggle('selected');
             if (!selectedAnswers[currentQuestionIndex]) {
                 selectedAnswers[currentQuestionIndex] = [];
             }
-            const index = selectedAnswers[currentQuestionIndex].indexOf(option);
+            const buttonNum = selectedAnswers[currentQuestionIndex].indexOf(option);
+            const buttonStatus = button.classList.contains('selected');
 
-            if (index === -1) {
-                //選択状態にした時の処理
+            if (buttonStatus === true) {
                 selectedAnswers[currentQuestionIndex].push(option);
             } else {
                 //選択状態を解除したときの処理
-                selectedAnswers[currentQuestionIndex].splice(index, 1);
+                selectedAnswers[currentQuestionIndex].splice(buttonNum, 1);
             }
-
         } else {
             const optionButtons = document.querySelectorAll('#options button');
             optionButtons.forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
             selectedAnswers[currentQuestionIndex] = [option];
 
-            if (currentQuestionIndex === 3) {
-                income_selectedIndex = options[currentQuestionIndex].indexOf(option) - 2; // インデックスを格納（最初の2つの項目は除外）
-            }
         }
 
         // 選択状態の選択肢を選択肢の順番に並び替える処理を追加
@@ -216,9 +224,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return options[currentQuestionIndex].indexOf(a) - options[currentQuestionIndex].indexOf(b);
             });
         }
-
-        // showSelections();
-        // showSliderForIncomeQuestion();  // スライダーの表示を更新
     }
     // showQuestion関数をグローバルにアクセスできるようにする
     window.showQuestion = showQuestion;
@@ -258,10 +263,9 @@ function showSelections() {
 //次へボタンを押したときの処理（次の質問および選択肢を表示させる）
 function showNextQuestion() {
     if (!selectedAnswers[currentQuestionIndex] || selectedAnswers[currentQuestionIndex].length === 0) {
-        alert('選択肢を選んでください。');
+        alert('選択肢を選んでちょうだい');
         return;
     }
-
     currentQuestionIndex++;
     showSelections();
     showQuestion();
@@ -269,7 +273,6 @@ function showNextQuestion() {
 
 //性別ごとに選択肢を変える処理
 function setOptionsByGender() {
-    console.log("selectedAnswers:", selectedAnswers); // デバッグ用
     if (selectedAnswers[0] && selectedAnswers[0][0] === '男性') {
         options[currentQuestionIndex] = optionsMale[currentQuestionIndex];
     } else {
