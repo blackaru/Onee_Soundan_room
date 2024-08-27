@@ -152,7 +152,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function performCalculation(callback) {
-    // population = calculatePopulation();
     [population, sum_age_area_population, population_Rate] = calculatePopulation();
     // 結果をcallback経由でscript.jsに返す
     callback(population, sum_age_area_population, population_Rate);
@@ -191,6 +190,8 @@ function calculatePopulation() {
     let workerProportion = [];
     let proportionAboveTarget = [];
     let edit_answers_edu = [];
+    let ansIncm = 0;
+    let more_incm = 0;
     const incm_text1 = [];
     const incm_text2 = [];
     incm_text1[0] = '平均年収';
@@ -211,6 +212,9 @@ function calculatePopulation() {
         answers.edu = answers.edu.filter(item => item !== "在学中");
         //学歴の回答が”気にしない”の場合、Incm_Males.csvの形式に合わせるために、”気にしない”の要素を配列から削除する
         edit_answers_edu = answers.edu.filter(item => item !== "気にしない");
+        //回答結果が万円単位なので、10000倍する
+        ansIncm = parseFloat(answers.income) * 10000;
+
 
         // 正規分布の累積分布関数 (CDF) を使用して推定
         function normalCDF(x, ave, stdDev) {
@@ -219,8 +223,6 @@ function calculatePopulation() {
         if (answers.gender[0] === '男性') {
             aveIncome = calculateByThreeElements_e2s(Incm_Males, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text1);
             workerProportion = calculateByThreeElements_e2s(Incm_Males, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text2);
-            // aveIncome = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, 99, 4, text1, answers.edu.length, 6, answers.edu);
-            // workerProportion = calculateByThreeElements(Incm_Males, answers.age.length, 2, answers.age, 99, 4, text2, answers.edu.length, 6, answers.edu);
         } else {
             aveIncome = calculateByThreeElements_e2s(Incm_Fems, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text1);
             workerProportion = calculateByThreeElements_e2s(Incm_Fems, answers.age.length, 2, answers.age, edit_answers_edu.length, 6, edit_answers_edu, 1, 2, incm_text2);
@@ -233,13 +235,18 @@ function calculatePopulation() {
         for (let e1 = 0; e1 < answers.age.length; e1++) {
             for (let e2 = 0; e2 < edit_answers_edu.length; e2++) {
                 stdDevIncome[e2][e1] = aveIncome[e2][e1] * 0.25; // 平均年収の25%を標準偏差として仮定
-                proportionAboveTarget[e2][e1] = 1 - normalCDF(answers.income[0], aveIncome[e2][e1], stdDevIncome[e2][e1]);  //回答した年収以上の人の割合を求める
+                proportionAboveTarget[e2][e1] = 1 - normalCDF(ansIncm, aveIncome[e2][e1], stdDevIncome[e2][e1]);  //回答した年収以上の人の割合を求める
                 if (!income_Rate[e1]) {
                     income_Rate[e1] = 0; // 初期化
                 }
-                //選択済みの年齢および学歴に該当する人に対しての割合を求める
-                income_Rate[e1] += Number(workerProportion[e2][e1]) * Number(proportionAboveTarget[e2][e1]);
+                //各年齢ごとに、希望する年収以上の人の割合が多い学歴をincome_Rateとして格納する
+                if (more_incm < proportionAboveTarget[e2][e1]) {
+                    more_incm = proportionAboveTarget[e2][e1];
+                }
+                income_Rate[e1] = more_incm;
             }
+
+            more_incm = 0;
         }
     }
 
@@ -272,14 +279,12 @@ function calculatePopulation() {
         //在学中の人口を差し引く計算を追加する
         if (answers.gender[0] === '男性') {
             edu_Rate = calculateByThreeElements_e3s(edu_Males, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
-            stu_rate = calculateByThreeElements_e2s(edu_Males, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, 1, 6, edu_text);
         } else {
             edu_Rate = calculateByThreeElements_e3s(edu_Fems, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, answers.edu.length, 6, answers.edu);
-            stu_rate = calculateByThreeElements_e2s(edu_Fems, answers.age.length, 2, answers.age, answers.region.length, 3, answers.region, 1, 6, edu_text);
         }
         for (let e1 = 0; e1 < answers.age.length; e1++) {
             for (let e2 = 0; e2 < answers.region.length; e2++) {
-                edu_Rate[e2][e1] = edu_Rate[e2][e1] - stu_rate[e2][e1];
+                edu_Rate[e2][e1] = edu_Rate[e2][e1];
             }
         }
     }
@@ -406,7 +411,6 @@ function calculatePopulation() {
     population_Rate = roundTo(population_Rate, 2);
 
     return [population, sum_age_area_population, population_Rate];
-
 }
 
 //２列目の要素数を引数として渡す場合にこの関数を使用する
@@ -537,7 +541,6 @@ function calculateByTwoElementsWithIndex(csvArray, e1SelectedNum, rowQuestionNum
                     } else {
                         row = null;   //収入以外にこの関数が使われた場合エラーとする  
                     }
-                    // if (!array_twoIndex[e2]) array_twoIndex[e2] = []; // 初期化
                     if (e2SelectedNum !== 1) {
                         //複数選択された場合、年齢ごとに足しこんでから返す
                         array_twoIndex[e2][e1] += parseFloat(csvArray[row][column]);

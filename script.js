@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         nextButton.dispatchEvent(new Event('mouseleave'));
 
         showQuestionList();
+        const optionButtons = document.querySelectorAll('#options button');
 
         if (currentQuestionIndex < questions.length) {
             // 質問4：収入の場合のみスライダーを表示
@@ -81,67 +82,66 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 sliderContainer.style.display = 'flex';
-                const optionButtons = document.querySelectorAll('#options button');
                 optionButtons.forEach(btn => btn.style.display = 'none'); // 選択肢ボタンを非表示にする
                 selectedAnswers[currentQuestionIndex] = incomeSlider.value;
 
             } else {
                 sliderContainer.style.display = 'none';
-                const optionButtons = document.querySelectorAll('#options button');
                 optionButtons.forEach(btn => btn.style.display = 'block'); // 選択肢ボタンを表示する
+            }
+            const question = questions[currentQuestionIndex];
+            if (question[1] === 'multiple') {
+                document.getElementById('question').innerText = question[3] + '\n(複数選択可)';
+            } else {
+                document.getElementById('question').innerText = question[3];
+            }
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
 
-                const question = questions[currentQuestionIndex];
-                if (question[1] === 'multiple') {
-                    document.getElementById('question').innerText = question[3] + '\n(複数選択可)';
+            setOptionsByGender(); // 性別に基づいて選択肢を設定
+
+            const optionsToDisplay = options[currentQuestionIndex];
+            const isMultipleChoice = optionsToDisplay[1] === '〇';
+
+            for (let i = 2; i < optionsToDisplay.length; i++) {
+                const option = optionsToDisplay[i];
+                const button = document.createElement('button');
+
+                // 質問10：性格の場合のみツールチップを追加
+                if (currentQuestionIndex === 9 && i !== 2) { // 質問10はインデックス9
+                    const tooltipSpan = document.createElement('span');
+                    tooltipSpan.classList.add('tooltiptext');
+                    tooltipSpan.innerText = tooltips[currentQuestionIndex][i - 1];
+                    const tooltipDiv = document.createElement('div');
+                    tooltipDiv.classList.add('tooltip');
+                    tooltipDiv.appendChild(button);
+                    tooltipDiv.appendChild(tooltipSpan);
+                    optionsContainer.appendChild(tooltipDiv);
+                } else if (currentQuestionIndex === 3) {
                 } else {
-                    document.getElementById('question').innerText = question[3];
+                    optionsContainer.appendChild(button);
                 }
-                const optionsContainer = document.getElementById('options');
-                optionsContainer.innerHTML = '';
 
-                setOptionsByGender(); // 性別に基づいて選択肢を設定
+                // 質問4以外の場合
+                if (currentQuestionIndex !== 3) { // 質問4はインデックス3
+                    button.innerText = option;
+                    button.classList.add('option-button');
 
-                const optionsToDisplay = options[currentQuestionIndex];
-                const isMultipleChoice = optionsToDisplay[1] === '〇';
+                    // クリックイベントを設定
+                    button.onclick = () => {
+                        toggleOption(button, option, isMultipleChoice);
 
-                for (let i = 2; i < optionsToDisplay.length; i++) {
-                    const option = optionsToDisplay[i];
-                    const button = document.createElement('button');
-
-                    // 質問10：性格の場合のみツールチップを追加
-                    if (currentQuestionIndex === 9 && i !== 2) { // 質問10はインデックス9
-                        const tooltipSpan = document.createElement('span');
-                        tooltipSpan.classList.add('tooltiptext');
-                        tooltipSpan.innerText = tooltips[currentQuestionIndex][i - 1];
-                        const tooltipDiv = document.createElement('div');
-                        tooltipDiv.classList.add('tooltip');
-                        tooltipDiv.appendChild(button);
-                        tooltipDiv.appendChild(tooltipSpan);
-                        optionsContainer.appendChild(tooltipDiv);
-                    } else {
-                        optionsContainer.appendChild(button);
-                    }
-
-                    // 質問4以外の場合
-                    if (currentQuestionIndex !== 3) { // 質問4はインデックス3
-                        button.innerText = option;
-                        button.classList.add('option-button');
-
-                        // クリックイベントを設定
-                        button.onclick = () => {
-                            toggleOption(button, option, isMultipleChoice);
-
-                            // 選択状態を反映
-                            if (selectedAnswers[currentQuestionIndex] && selectedAnswers[currentQuestionIndex].includes(option)) {
-                                button.classList.add('selected');
-                            } else {
-                                button.classList.remove('selected');
-                            }
-                            allSelectedButton(button, option);
-                        };
-                    }
+                        // 選択状態を反映
+                        if (selectedAnswers[currentQuestionIndex] && selectedAnswers[currentQuestionIndex].includes(option)) {
+                            button.classList.add('selected');
+                        } else {
+                            button.classList.remove('selected');
+                        }
+                        allSelectedButton(button, option);
+                    };
                 }
             }
+
         } else {
             document.getElementById('question').innerText = 'よ～くわかったわ。';
             document.getElementById('options').innerHTML = '';
